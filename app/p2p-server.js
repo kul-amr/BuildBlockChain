@@ -19,12 +19,10 @@ class P2pServer {
     }
 
     connectToPeers(){
-
         peers.forEach(peer =>{
             const socket = new websocket(peer);
             socket.on('open',()=> this.connectSocket(socket));
         });
-
     }
 
     connectSocket(socket){
@@ -32,14 +30,23 @@ class P2pServer {
         console.log('socket connected');
 
         this.messageHandler(socket);
+        this.sendChain(socket);
+    }
+
+    sendChain(socket){
         socket.send(JSON.stringify(this.blockchain.chain));
     }
 
     messageHandler(socket){
         socket.on('message', message=>{
             const data = JSON.parse(message);
-            console.log('data is : ', data);
+            // console.log('data is : ', data);
+            this.blockchain.replaceChain(data);
         });
+    }
+
+    syncChains(){
+        this.sockets.forEach(socket => this.sendChain(socket));
     }
 }
 
